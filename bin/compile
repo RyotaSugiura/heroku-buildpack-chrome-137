@@ -64,6 +64,15 @@ curl --silent --show-error --fail --retry 3 --retry-connrefused --connect-timeou
 unzip -q -o "$ZIP_LOCATION" -d "$INSTALL_DIR" | indent
 rm -f "$ZIP_LOCATION"
 
+echo "Removing unnecessary files to reduce slug size" | indent
+# Remove locales except en-US and ja
+find "$INSTALL_DIR/chrome-linux64/locales" -type f ! -name 'en-US.pak' ! -name 'ja.pak' -delete | indent || true
+# Remove debug symbols
+rm -f "$INSTALL_DIR/chrome-linux64/"*.breakpad || true
+# Remove swiftshader (software renderer, not needed for headless)
+rm -rf "$INSTALL_DIR/chrome-linux64/swiftshader" || true
+echo "Chrome size reduction complete" | indent
+
 source "$BUILDPACK_DIR/bin/install-chrome-dependencies"
 
 echo "Adding executables to PATH" | indent
